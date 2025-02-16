@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Google Maps Location</title>
+    <style>
+        #map {
+            height: 500px;
+            width: 100%;
+        }
+    </style>
+    <script>
+        function requestGeolocationPermission() {
+            if (navigator.permissions) {
+                navigator.permissions.query({ name: 'geolocation' }).then((permissionStatus) => {
+                    if (permissionStatus.state === "granted" || permissionStatus.state === "prompt") {
+                        initMap();
+                    } else {
+                        alert("Location permission is required to display your position on the map.");
+                    }
+                });
+            } else {
+                initMap();
+            }
+        }
+
+        function initMap() {
+            const map = new google.maps.Map(document.getElementById("map"), {
+                zoom: 15,
+                center: { lat: 0, lng: 0 }, // Default center
+            });
+
+            const infoWindow = new google.maps.InfoWindow();
+
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    (position) => {
+                        const pos = {
+                            lat: position.coords.latitude,
+                            lng: position.coords.longitude,
+                        };
+                        map.setCenter(pos);
+                        new google.maps.Marker({
+                            position: pos,
+                            map: map,
+                        });
+                    },
+                    (error) => {
+                        console.error("Geolocation error:", error);
+                        infoWindow.setPosition(map.getCenter());
+                        infoWindow.setContent("Error: The Geolocation service failed.");
+                        infoWindow.open(map);
+                    }
+                );
+            } else {
+                infoWindow.setPosition(map.getCenter());
+                infoWindow.setContent("Error: Your browser doesn't support geolocation.");
+                infoWindow.open(map);
+            }
+        }
+    </script>
+</head>
+<body onload="requestGeolocationPermission()">
+    <h2>Your Exact Location on Google Maps</h2>
+    <div id="map"></div>
+    <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBpBhGblihvjVzrTfv_plJy2Nm3iTeU93c&callback=initMap"></script>
+</body>
+</html>
